@@ -1,7 +1,5 @@
 require("mod-gui")
 
-local mod = nil
-
 local function queue()
 	return {first = 0, last = -1}
 end
@@ -49,12 +47,11 @@ local function pop (list)
 end
 
 local function check_state()
-	mod = global
-	if not mod.entities then
-		mod.entities = queue()
+	if not global.entities then
+		global.entities = queue()
 		for _, surface in pairs(game.surfaces) do
 			for _, en in ipairs(surface.find_entities_filtered({name = {'smr-generator-1', 'smr-generator-2', 'smr-generator-3'}})) do
-				push(mod.entities, en)
+				push(global.entities, en)
 			end
 		end
 	end
@@ -94,7 +91,7 @@ end
 local function on_create_entity(event)
 	local entity = event.created_entity
 	if entity and entity.valid and prefixed(entity.name, 'smr-generator-') then
-		push(mod.entities, entity)
+		push(global.entities, entity)
 		local stack = event.stack
 		local energy = stack.get_tag('buffer_energy')
 		local health = stack.get_tag('real_health')
@@ -135,7 +132,7 @@ end
 local function on_nth_tick()
 	check_state()
 
-	local entity = shift(mod.entities)
+	local entity = shift(global.entities)
 
 	if entity and entity.valid then
 		if entity.energy < 1 and entity.order_deconstruction(entity.force) then
@@ -146,7 +143,7 @@ local function on_nth_tick()
 				force = entity.force,
 			})
 		end
-		push(mod.entities, entity)
+		push(global.entities, entity)
 	end
 end
 
@@ -166,3 +163,41 @@ end)
 script.on_load(function()
 	attach_events()
 end)
+
+local function tbl_find(t, val)
+    for k,v in pairs(t) do 
+        game.print(k .. "=" .. v)
+        if k == val then return v end
+    end
+    return nil
+end    
+
+local function on_create_entity(event)
+    local entity = event.created_entity or event.entity
+
+    if entity and entity.valid and prefixed(entity.name, 'smr-generator-') then
+        push(global.entities, entity)
+
+        local energy = nil
+        local health = nil
+
+        if event.stack then
+            energy = event.stack.get_tag('buffer_energy')
+            health = event.stack.get_tag('real_health')
+        elseif event.tags then
+            energy = tbl_find(event.tags, 'buffer_energy')
+            health = tbl_find(event.tags, 'real_health')
+        end
+
+        if energy then
+            entity.energy = tonumber(energy)
+            entity.health = tonumber(health)
+        else
+            entity.energy = entity.prototype.electric_energy_source_prototype.buffer_capacity
+            entity.health = entity.prototype.max_health -- Unsure if reduced HP on placement was intentional.
+        end
+    end
+end
+
+-- Change in attach_events to add handler for script_raised_revive
+script.on_event({defines.events.on_built_entity, defines.events.on_robot_built_entity, defines.events.script_raised_revive}, on_create_entity)

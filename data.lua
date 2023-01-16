@@ -7,6 +7,7 @@ local function generator(name, upgrade, capacity, flow, order, create, recharge,
 	eei.energy_source.buffer_capacity = capacity
 	eei.energy_source.input_flow_limit = '0kW'
 	eei.energy_source.output_flow_limit = flow
+	eei.energy_source.usage_priority = "secondary-output"
 	eei.minable.result = name
 	eei.energy_production = '0kW'
 	eei.next_upgrade = upgrade
@@ -111,6 +112,7 @@ local function generator(name, upgrade, capacity, flow, order, create, recharge,
 			ingredients = ringredients,
 			results = {
 				{ type = 'item', name = name, amount = 1 },
+				{ type = 'item', name = 'used-up-uranium-fuel-cell', amount = recharge }
 			},
 			order = order,
 		},
