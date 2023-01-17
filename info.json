@@ -4,7 +4,7 @@
   "factorio_version": "1.1",
   "title": "SMRs (Forked)",
   "author": "dorfl, nihilistzsche",
-  "homepage": "https://gitlab.com/nihilistzsche/smr",
+  "homepage": "https://github.com/nihilistzsche/smr",
   "description": "Small modular nuclear reactors designed to be deployed off-grid at remote sites. SMRs are manufactured as sealed units with a fixed energy capacity, including both fuel and generator components. This means they can be quickly setup anywhere but once depleted must be returned to base for refurbishment. Forked with suggestions and improvements from the discussion page.",
   "dependencies": [
     "base >= 1.1.0",
